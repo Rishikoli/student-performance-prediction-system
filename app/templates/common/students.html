@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import pager, grade_badge, risk_badge %}
+{% block title %}Students{% endblock %}
+{% block heading %}Students{% if current_user.role == 'teacher' %} · {{ current_user.subject.name }}{% endif %}{% endblock %}
+{% block actions %}
+  <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('common.export_csv') }}"><i class="bi bi-download"></i> Export CSV</a>
+  {% if current_user.role == 'admin' %}<a class="btn btn-sm btn-primary" href="{{ url_for('admin.student_form') }}"><i class="bi bi-person-plus"></i> Add</a>{% endif %}
+{% endblock %}
+{% block content %}
+<form class="card card-body mb-3 no-print"><div class="row g-2 align-items-end">
+  <div class="col-md-3"><label class="form-label small mb-1">Search</label><input class="form-control form-control-sm" name="q" value="{{ args.q }}" placeholder="Roll no or name"></div>
+  {% if current_user.role == 'admin' %}
+  <div class="col-md-2"><label class="form-label small mb-1">Subject</label><select class="form-select form-select-sm" name="subject">
+    <option value="">All</option><option value="MAT" {% if args.subject == 'MAT' %}selected{% endif %}>Mathematics</option><option value="POR" {% if args.subject == 'POR' %}selected{% endif %}>Portuguese</option></select></div>
+  {% endif %}
+  <div class="col-md-2"><label class="form-label small mb-1">School</label><select class="form-select form-select-sm" name="school">
+    <option value="">All</option><option {% if args.school == 'GP' %}selected{% endif %}>GP</option><option {% if args.school == 'MS' %}selected{% endif %}>MS</option></select></div>
+  <div class="col-md-2"><label class="form-label small mb-1">Result</label><select class="form-select form-select-sm" name="status">
+    {% for v, t in [('', 'All'), ('pass', 'Passed'), ('fail', 'Failed'), ('pending', 'Final grade pending')] %}<option value="{{ v }}" {% if args.status == v %}selected{% endif %}>{{ t }}</option>{% endfor %}</select></div>
+  <div class="col-md-2"><label class="form-label small mb-1">Sort</label><select class="form-select form-select-sm" name="sort">
+    {% for v, t in [('roll', 'Roll no'), ('g3', 'Final grade ↓'), ('g3_asc', 'Final grade ↑'), ('absences', 'Absences ↓')] %}<option value="{{ v }}" {% if args.sort == v %}selected{% endif %}>{{ t }}</option>{% endfor %}</select></div>
+  <div class="col-md-1"><button class="btn btn-sm btn-primary w-100">Filter</button></div>
+</div></form>
+<div class="card"><div class="table-responsive">
+<table class="table table-hover table-sm mb-0 num">
+  <thead><tr><th>Roll no</th><th>Name</th><th>School</th><th>Subject</th><th class="text-end">Absences</th><th class="text-end">G1</th><th class="text-end">G2</th><th class="text-end">G3</th><th>Grade</th><th>Risk</th></tr></thead>
+  <tbody>
+  {% for r in page.items %}
+    <tr style="cursor:pointer" onclick="location='{{ url_for('common.student_detail', sid=r.student_id) }}'">
+      <td><a href="{{ url_for('common.student_detail', sid=r.student_id) }}">{{ r.student.roll_no }}</a></td>
+      <td>{{ r.student.name }}</td><td>{{ r.student.school }}</td><td>{{ r.subject.code }}</td>
+      <td class="text-end">{{ r.absences }}</td>
+      {% for g in [r.G1, r.G2, r.G3] %}<td class="text-end">{{ g if g is not none else '—' }}</td>{% endfor %}
+      <td>{{ grade_badge(r.G3) }}</td><td>{{ risk_badge(r.latest_prediction) }}</td>
+    </tr>
+  {% else %}<tr><td colspan="10" class="text-center text-secondary py-4">No students match.</td></tr>
+  {% endfor %}
+  </tbody>
+</table></div>
+<div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2">
+  <span class="small text-secondary">{{ page.total }} record(s)</span>{{ pager(page, 'common.students', args) }}</div></div>
+{% endblock %}

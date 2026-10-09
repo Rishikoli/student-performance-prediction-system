@@ -1,0 +1,57 @@
+{% from '_macros.html' import grade_badge, risk_badge %}
+<div class="row g-3 mb-3">
+  <div class="col-lg-5"><div class="card h-100"><div class="card-header">Profile</div><div class="card-body small">
+    <div class="row g-2">
+    {% for label, val in [('School', {'GP':'Gabriel Pereira','MS':'Mousinho da Silveira'}[st.school]), ('Sex', {'F':'Female','M':'Male'}[st.sex]), ('Age', st.age),
+                          ('Address', {'U':'Urban','R':'Rural'}[st.address]), ('Family size', {'LE3':'≤ 3','GT3':'> 3'}[st.famsize]),
+                          ('Parents', {'T':'Together','A':'Apart'}[st.Pstatus]), ('Mother edu / job', st.Medu ~ ' / ' ~ st.Mjob), ('Father edu / job', st.Fedu ~ ' / ' ~ st.Fjob),
+                          ('Internet', 'Yes' if st.internet else 'No'), ('Nursery', 'Yes' if st.nursery else 'No')] %}
+      <div class="col-6"><div class="text-secondary">{{ label }}</div><div>{{ val }}</div></div>
+    {% endfor %}
+    </div></div></div></div>
+  <div class="col-lg-7"><div class="card h-100"><div class="card-header">Grade progression</div><div class="card-body"><div class="chart-box"><canvas id="progChart"></canvas></div></div></div></div>
+</div>
+{% for r in st.records %}
+{% set p = r.latest_prediction %}
+<div class="card mb-3" id="rec{{ r.id }}">
+  <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <span>{{ r.subject.name }}</span>
+    <div class="d-flex gap-2 no-print">
+      <form method="post" action="{{ url_for('common.predict', rid=r.id) }}"><button class="btn btn-sm btn-primary"><i class="bi bi-magic"></i> Predict</button></form>
+      {% if current_user.role != 'student' and can_edit_record(r) %}
+        <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('common.edit_record', rid=r.id) }}"><i class="bi bi-pencil"></i> Edit record</a>
+      {% endif %}
+      {% if current_user.role == 'admin' %}
+        <form method="post" action="{{ url_for('admin.delete_record', rid=r.id) }}" onsubmit="return confirm('Remove this enrolment?')"><button class="btn btn-sm btn-outline-danger"><i class="bi bi-x-lg"></i></button></form>
+      {% endif %}
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="row g-3 num">
+      {% for label, val in [('Period 1 (G1)', r.G1), ('Period 2 (G2)', r.G2), ('Final (G3)', r.G3), ('Absences', r.absences),
+                            ('Assignments', r.assignment_score), ('Practicals', r.practical_score)] %}
+      <div class="col-4 col-md-2"><div class="text-secondary small">{{ label }}</div><div class="fs-4 fw-semibold">{{ val if val is not none else '—' }}</div></div>
+      {% endfor %}
+    </div>
+    <hr>
+    <div class="row g-3 small">
+      <div class="col-md-6">
+        <div class="mb-1"><b>Grade:</b> {{ grade_badge(r.G3) }} &nbsp; <b>Past failures:</b> {{ r.failures }} &nbsp; <b>Study time:</b> {{ ['', '<2h', '2-5h', '5-10h', '>10h'][r.studytime] }}/week</div>
+        <div class="text-secondary">Guardian {{ r.guardian }} · school support {{ 'yes' if r.schoolsup else 'no' }} · family support {{ 'yes' if r.famsup else 'no' }} · paid classes {{ 'yes' if r.paid else 'no' }} ·
+          activities {{ 'yes' if r.activities else 'no' }} · wants higher edu {{ 'yes' if r.higher else 'no' }} · going out {{ r.goout }}/5 · alcohol {{ r.Dalc }}/{{ r.Walc }} (workday/weekend) · health {{ r.health }}/5</div>
+      </div>
+      <div class="col-md-6">
+        {% if p %}
+          <div class="d-flex align-items-center gap-3 flex-wrap">
+            {{ risk_badge(p) }}
+            <span>Predicted final grade <b class="fs-5">{{ p.predicted_g3 }}</b>/20 ({{ p.predicted_grade }})</span>
+            <span>Pass probability <b>{{ '%.0f'|format(p.pass_probability * 100) }}%</b></span>
+          </div>
+          <div class="text-secondary mt-1">{{ 'Full model (uses G1, G2)' if p.feature_set == 'full' else 'Early-warning model (no period grades)' }} · {{ p.created_at.strftime('%d %b %Y %H:%M') }}</div>
+          {% if tips and tips.get(r.id) %}<ul class="mt-2 mb-0">{% for t in tips[r.id] %}<li>{{ t }}</li>{% endfor %}</ul>{% endif %}
+        {% else %}<span class="text-secondary">No prediction yet. Click <b>Predict</b>.</span>{% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endfor %}

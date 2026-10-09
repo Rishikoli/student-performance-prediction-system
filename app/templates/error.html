@@ -1,0 +1,5 @@
+{% extends 'base.html' %}
+{% block title %}{{ error.code }}{% endblock %}
+{% block heading %}{{ error.code }} · {{ error.name }}{% endblock %}
+{% block content %}<p class="text-secondary">{{ error.description }}</p><a href="{{ url_for('common.index') }}" class="btn btn-primary">Back to dashboard</a>{% endblock %}
+{% block public %}<div class="login-wrap"><div class="text-center"><h1>{{ error.code }}</h1><p>{{ error.description }}</p><a href="{{ url_for('auth.login') }}">Log in</a></div></div>{% endblock %}

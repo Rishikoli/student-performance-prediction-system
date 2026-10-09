@@ -1,0 +1,14 @@
+<script>
+(async () => {
+  const data = await (await fetch('{{ url_for("api.student", sid=st.id) }}')).json();
+  const ds = [];
+  data.forEach(d => {
+    ds.push({ label: d.subject, data: d.grades, borderColor: SUBJECT_COLOR()[d.code], backgroundColor: SUBJECT_COLOR()[d.code], spanGaps: true });
+    if (d.predicted_g3 !== null)
+      ds.push({ label: d.subject + ' (predicted)', data: [null, d.grades[1], d.predicted_g3], borderDash: [6, 4],
+                borderColor: SUBJECT_COLOR()[d.code], backgroundColor: css('--surface-1'), pointStyle: 'rectRot', pointRadius: 6 });
+  });
+  new Chart(progChart, { type: 'line', data: { labels: ['Period 1', 'Period 2', 'Final'], datasets: ds },
+    options: { scales: axes('Grade (0-20)', { max: 20 }), plugins: { legend: { position: 'bottom' } } } });
+})();
+</script>

@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import grade_badge, risk_badge %}
+{% block title %}{{ st.roll_no }}{% endblock %}
+{% block heading %}{{ st.name }} <span class="text-secondary fs-6">{{ st.roll_no }}</span>{% endblock %}
+{% block actions %}
+  <button class="btn btn-sm btn-outline-secondary" onclick="print()"><i class="bi bi-printer"></i> Print report</button>
+  {% if current_user.role == 'admin' %}
+    <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('admin.student_form', sid=st.id) }}"><i class="bi bi-pencil"></i> Edit</a>
+    {% if st.records|length < subjects|length %}<a class="btn btn-sm btn-outline-primary" href="{{ url_for('common.add_record', sid=st.id) }}"><i class="bi bi-plus"></i> Enrol</a>{% endif %}
+    <form method="post" action="{{ url_for('admin.delete_student', sid=st.id) }}" onsubmit="return confirm('Delete this student and all records?')"><button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button></form>
+  {% endif %}
+{% endblock %}
+{% block content %}
+{% include 'common/_student_body.html' %}
+{% endblock %}
+{% block scripts %}{% include 'common/_student_chart.html' %}{% endblock %}

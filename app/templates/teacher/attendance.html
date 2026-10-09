@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import pager %}
+{% block title %}Attendance{% endblock %}
+{% block heading %}Attendance · {{ current_user.subject.name }}{% endblock %}
+{% block content %}
+<form class="d-flex gap-2 mb-3 flex-wrap no-print" method="get">
+  <input type="date" class="form-control form-control-sm" style="width:auto" name="date" value="{{ day.isoformat() }}">
+  <input class="form-control form-control-sm" style="width:220px" name="q" value="{{ q }}" placeholder="Search roll no or name">
+  <button class="btn btn-sm btn-outline-secondary">Load</button>
+</form>
+<p class="small text-secondary">Marking a student absent adds to their absence count, which the prediction model uses. Unmarked students are left unchanged.</p>
+<form method="post" action="{{ url_for('teacher.attendance', date=day.isoformat(), q=q, page=page.page) }}">
+<div class="card"><div class="table-responsive"><table class="table table-sm mb-0 num">
+  <thead><tr><th>Roll no</th><th>Name</th><th class="text-end">Total absences</th><th>{{ day.strftime('%d %b %Y') }}</th></tr></thead>
+  <tbody>{% for r in page.items %}{% set m = marked.get(r.id) %}<tr>
+    <td>{{ r.student.roll_no }}</td><td>{{ r.student.name }}</td><td class="text-end">{{ r.absences }}</td>
+    <td><div class="btn-group btn-group-sm" role="group">
+      <input type="radio" class="btn-check" name="st_{{ r.id }}" id="p{{ r.id }}" value="present" {% if m == 'present' %}checked{% endif %}><label class="btn btn-outline-success" for="p{{ r.id }}">Present</label>
+      <input type="radio" class="btn-check" name="st_{{ r.id }}" id="a{{ r.id }}" value="absent" {% if m == 'absent' %}checked{% endif %}><label class="btn btn-outline-danger" for="a{{ r.id }}">Absent</label>
+    </div></td></tr>{% endfor %}</tbody>
+</table></div>
+<div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2">
+  <div class="d-flex gap-2"><button class="btn btn-primary"><i class="bi bi-save"></i> Save attendance</button>
+    <button type="button" class="btn btn-outline-secondary" onclick="document.querySelectorAll('input[value=present]').forEach(i => { if (!document.querySelector(`input[name=${i.name}]:checked`)) i.checked = true; })">Mark unmarked present</button></div>
+  {{ pager(page, 'teacher.attendance', {'date': day.isoformat(), 'q': q}) }}</div></div>
+</form>
+{% endblock %}

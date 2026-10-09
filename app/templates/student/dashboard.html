@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}My performance{% endblock %}
+{% block heading %}My performance{% endblock %}
+{% block actions %}<button class="btn btn-sm btn-outline-secondary" onclick="print()"><i class="bi bi-printer"></i> Print</button>{% endblock %}
+{% block content %}
+{% set can_edit_record = none %}
+{% include 'common/_student_body.html' %}
+<div class="card"><div class="card-header">Recent attendance</div><div class="table-responsive"><table class="table table-sm mb-0">
+  <thead><tr><th>Date</th><th>Subject</th><th>Status</th></tr></thead>
+  <tbody>{% for a in recent %}<tr><td>{{ a.date.strftime('%d %b %Y') }}</td><td>{{ a.record.subject.name }}</td>
+    <td>{% if a.status == 'present' %}<span class="badge text-bg-success">Present</span>{% else %}<span class="badge text-bg-danger">Absent</span>{% endif %}</td></tr>
+  {% else %}<tr><td colspan="3" class="text-secondary text-center py-3">No attendance entries recorded yet.</td></tr>{% endfor %}</tbody>
+</table></div></div>
+{% endblock %}
+{% block scripts %}{% include 'common/_student_chart.html' %}{% endblock %}

@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block title %}ML models{% endblock %}
+{% block heading %}Machine learning models{% endblock %}
+{% block actions %}
+<form method="post" action="{{ url_for('admin.train') }}" class="d-flex gap-2">
+  <select name="source" class="form-select form-select-sm" style="width:auto">
+    <option value="csv">Train on UCI dataset (CSV)</option>
+    <option value="database">Train on current database records</option>
+  </select>
+  <button class="btn btn-sm btn-primary" {% if training.running %}disabled{% endif %}><i class="bi bi-cpu"></i> Retrain</button>
+</form>
+{% endblock %}
+{% block content %}
+<div class="card mb-3 {% if not training.running and not training.log %}d-none{% endif %}" id="trainCard">
+  <div class="card-header">Training log <span id="trainState" class="badge text-bg-info">{{ 'running' if training.running else 'finished' }}</span></div>
+  <div class="card-body"><pre class="small mb-0" id="trainLog" style="max-height:260px;overflow:auto">{{ training.log|join('\n') }}</pre></div>
+</div>
+{% if not metrics %}
+  <div class="alert alert-warning">No trained models yet. Click <b>Retrain</b>.</div>
+{% else %}
+<p class="text-secondary">Trained {{ metrics.trained_at.replace('T', ' ') }} on {{ metrics.n_samples }} records from <b>{{ metrics.source }}</b>
+  ({{ metrics.n_train }} train / {{ metrics.n_test }} held-out test, stratified by grade band). Hyper-parameters chosen with 5-fold cross-validation on the training split;
+  the model with the best CV score is refit on all data and deployed.</p>
+{% set tasks = [('pass', 'Pass / fail classification (G3 ≥ 10)', [('accuracy','Accuracy'),('precision','Precision'),('recall','Recall'),('f1','F1'),('roc_auc','ROC-AUC')]),
+                ('grade', 'Five-level grade classification (A–F)', [('accuracy','Accuracy'),('f1_macro','Macro F1')]),
+                ('g3', 'Final grade regression (G3, 0–20)', [('rmse','RMSE'),('mae','MAE'),('r2','R²')])] %}
+{% for fs, fs_label in [('full', 'With period grades G1, G2'), ('early', 'Early warning: without G1, G2')] %}
+<h2 class="h5 mt-4">{{ fs_label }}</h2>
+<div class="row g-3">
+  {% for task, title, cols in tasks %}
+  {% set res = metrics.results[fs ~ '_' ~ task] %}
+  <div class="{{ {'pass': 'col-xl-5 col-lg-12', 'grade': 'col-xl-3 col-lg-6', 'g3': 'col-xl-4 col-lg-6'}[task] }}"><div class="card h-100"><div class="card-header small">{{ title }}</div>
+    <div class="table-responsive"><table class="table table-sm mb-0 num small">
+      <thead><tr><th>Model</th>{% for k, l in cols %}<th class="text-end">{{ l }}</th>{% endfor %}</tr></thead>
+      <tbody>{% for name, m in res.items() %}
+        <tr {% if metrics.best[fs ~ '_' ~ task] == name %}class="fw-semibold"{% endif %}>
+          <td class="text-nowrap">{{ name }}{% if metrics.best[fs ~ '_' ~ task] == name %} <i class="bi bi-check-circle-fill text-primary" title="Deployed model"></i>{% endif %}</td>
+          {% for k, l in cols %}<td class="text-end">{{ '%.3f'|format(m[k]) }}</td>{% endfor %}
+        </tr>{% endfor %}</tbody>
+    </table></div>
+    <div class="card-body small text-secondary pt-2">
+      <i class="bi bi-check-circle-fill text-primary"></i> = deployed model.
+      {% for name, m in res.items() %}<div><b>{{ name }}</b>: {{ m.params }}</div>{% endfor %}
+    </div>
+  </div></div>
+  {% endfor %}
+</div>
+{% set best_pass = metrics.results[fs ~ '_pass'][metrics.best[fs ~ '_pass']] %}
+<div class="row g-3 mt-1">
+  <div class="col-lg-4"><div class="card h-100"><div class="card-header small">Confusion matrix: {{ metrics.best[fs ~ '_pass'] }} (test set)</div>
+    <div class="card-body"><table class="table table-bordered text-center num mb-0">
+      <tr><th></th><th>Pred. Fail</th><th>Pred. Pass</th></tr>
+      {% for i in range(2) %}<tr><th>Actual {{ best_pass.labels[i] }}</th>{% for j in range(2) %}<td class="{{ 'table-success' if i == j else 'table-danger' }}">{{ best_pass.confusion_matrix[i][j] }}</td>{% endfor %}</tr>{% endfor %}
+    </table></div></div></div>
+  <div class="col-lg-8"><div class="card h-100"><div class="card-header small">Random Forest feature importance (pass/fail)</div>
+    <div class="card-body"><div class="chart-box"><canvas id="imp_{{ fs }}"></canvas></div></div></div></div>
+</div>
+{% endfor %}
+{% endif %}
+{% endblock %}
+{% block scripts %}
+<script>
+{% if metrics %}
+const imp = {{ metrics.feature_importance|tojson }};
+for (const fs of ['full', 'early']) {
+  const e = Object.entries(imp[fs]).sort((a, b) => b[1] - a[1]).slice(0, 12);
+  barChart('imp_' + fs, e.map(x => x[0]), e.map(x => +x[1].toFixed(4)), 'Importance', { horizontal: true });
+}
+{% endif %}
+{% if training.running %}
+const poll = setInterval(async () => {
+  const s = await (await fetch('{{ url_for("admin.train_status") }}')).json();
+  trainLog.textContent = s.log.join('\n'); trainLog.scrollTop = trainLog.scrollHeight;
+  if (!s.running) { clearInterval(poll); trainState.textContent = s.error ? 'failed' : 'finished'; if (!s.error) setTimeout(() => location.reload(), 800); }
+}, 2000);
+{% endif %}
+</script>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import field %}
+{% block title %}Academic record{% endblock %}
+{% block heading %}{{ ('Edit ' ~ rec.subject.name ~ ' record') if rec else 'New enrolment' }} · {{ st.roll_no }}{% endblock %}
+{% block content %}
+<form method="post">
+<div class="card mb-3"><div class="card-header">Marks &amp; attendance</div><div class="card-body"><div class="row g-3">
+  {% if not rec %}<div class="col-md-4 col-sm-6"><label class="form-label small mb-1">Subject</label>
+    <select class="form-select form-select-sm" name="subject_id">{% for s in subjects %}<option value="{{ s.id }}">{{ s.name }}</option>{% endfor %}</select></div>{% endif %}
+  {% for f in fields[-6:] %}{{ field(f, values) }}{% endfor %}
+</div></div></div>
+<div class="card mb-3"><div class="card-header">Study habits &amp; background (course survey)</div><div class="card-body"><div class="row g-3">
+  {% for f in fields[:-6] %}{{ field(f, values) }}{% endfor %}
+</div></div></div>
+<button class="btn btn-primary">Save</button>
+<a class="btn btn-link" href="{{ url_for('common.student_detail', sid=st.id) }}">Cancel</a>
+</form>
+{% endblock %}

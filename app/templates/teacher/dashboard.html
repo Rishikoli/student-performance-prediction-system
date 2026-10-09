@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import risk_badge %}
+{% block title %}Teacher dashboard{% endblock %}
+{% block heading %}{{ current_user.subject.name }} dashboard{% endblock %}
+{% block actions %}<form method="post" action="{{ url_for('teacher.predict_all') }}"><button class="btn btn-sm btn-primary"><i class="bi bi-magic"></i> Predict all my students</button></form>{% endblock %}
+{% block content %}
+<div class="row g-3 mb-3">
+  <div class="col-6 col-lg-3"><div class="card stat-tile"><div class="card-body"><div class="label">Enrolled students</div><div class="value">{{ stats.students }}</div></div></div></div>
+  <div class="col-6 col-lg-3"><div class="card stat-tile"><div class="card-body"><div class="label">Pass rate</div><div class="value">{{ '%.1f'|format(stats.pass_rate) }}%</div></div></div></div>
+  <div class="col-6 col-lg-3"><div class="card stat-tile"><div class="card-body"><div class="label">Average final grade</div><div class="value">{{ '%.2f'|format(stats.avg_g3) }}</div><div class="sub">out of 20</div></div></div></div>
+  <div class="col-6 col-lg-3"><div class="card stat-tile"><div class="card-body"><div class="label">Average absences</div><div class="value">{{ '%.1f'|format(stats.avg_abs) }}</div></div></div></div>
+</div>
+<div class="row g-3">
+  <div class="col-lg-6"><div class="card"><div class="card-header">Grade distribution</div><div class="card-body"><div class="chart-box"><canvas id="gradeChart"></canvas></div></div></div></div>
+  <div class="col-lg-6"><div class="card"><div class="card-header">Predicted risk levels</div><div class="card-body"><div class="chart-box"><canvas id="riskChart"></canvas></div></div></div></div>
+  <div class="col-lg-6"><div class="card"><div class="card-header">Average grade by period</div><div class="card-body"><div class="chart-box"><canvas id="periodChart"></canvas></div></div></div></div>
+  <div class="col-lg-6"><div class="card"><div class="card-header d-flex justify-content-between">Highest-risk students <a class="small" href="{{ url_for('teacher.at_risk') }}">View all</a></div>
+    <div class="table-responsive"><table class="table table-sm mb-0 num">
+      <thead><tr><th>Student</th><th class="text-end">G2</th><th class="text-end">Predicted G3</th><th class="text-end">Pass prob.</th><th>Risk</th></tr></thead>
+      <tbody>{% for p in at_risk %}<tr>
+        <td><a href="{{ url_for('common.student_detail', sid=p.record.student_id) }}">{{ p.record.student.roll_no }}</a></td>
+        <td class="text-end">{{ p.record.G2 if p.record.G2 is not none else '—' }}</td><td class="text-end">{{ p.predicted_g3 }}</td>
+        <td class="text-end">{{ '%.0f'|format(p.pass_probability * 100) }}%</td><td>{{ risk_badge(p) }}</td></tr>
+      {% else %}<tr><td colspan="5" class="text-secondary text-center py-4">No at-risk predictions. Run “Predict all my students”.</td></tr>{% endfor %}</tbody>
+    </table></div></div></div>
+</div>
+{% endblock %}
+{% block scripts %}<script>loadStats().then(s => { if (!s.empty) renderStatsCharts(s); });</script>{% endblock %}

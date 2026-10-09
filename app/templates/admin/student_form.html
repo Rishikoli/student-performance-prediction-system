@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import field %}
+{% block title %}Student{% endblock %}
+{% block heading %}{{ 'Edit student ' ~ st.roll_no if st else 'Add student' }}{% endblock %}
+{% block content %}
+<form method="post">
+<div class="card mb-3"><div class="card-header">Personal &amp; family details</div><div class="card-body"><div class="row g-3">
+  {% for f in student_fields %}{{ field(f, values) }}{% endfor %}
+</div></div></div>
+{% if not st %}
+<div class="card mb-3"><div class="card-header">First subject enrolment</div><div class="card-body"><div class="row g-3">
+  <div class="col-md-4 col-sm-6"><label class="form-label small mb-1">Subject</label>
+    <select class="form-select form-select-sm" name="subject_id">{% for s in subjects %}<option value="{{ s.id }}">{{ s.name }}</option>{% endfor %}</select></div>
+  {% for f in record_fields %}{{ field(f, values) }}{% endfor %}
+  <div class="col-md-4 col-sm-6"><label class="form-label small mb-1">Login password (default student123)</label>
+    <input type="text" class="form-control form-control-sm" name="password" placeholder="student123"></div>
+</div></div></div>
+{% endif %}
+<button class="btn btn-primary">Save student</button>
+<a class="btn btn-link" href="{{ url_for('common.student_detail', sid=st.id) if st else url_for('common.students') }}">Cancel</a>
+</form>
+{% endblock %}

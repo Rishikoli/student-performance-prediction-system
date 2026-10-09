@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import field %}
+{% block title %}Predict performance{% endblock %}
+{% block heading %}Predict student performance{% endblock %}
+{% block content %}
+<p class="text-secondary">Enter a student's profile to estimate their final grade. Leave G1 and G2 blank for an early-warning prediction before any exams.</p>
+{% if result %}
+<div class="card mb-3 border-2" style="border-color: var(--{{ {'High':'critical','Medium':'warning','Low':'good'}[result.risk_level] }})"><div class="card-body">
+  <div class="row g-3 align-items-center">
+    <div class="col-md-3 stat-tile"><div class="label">Predicted final grade</div><div class="value">{{ result.predicted_g3 }}<span class="fs-6 text-secondary">/20</span></div></div>
+    <div class="col-md-2 stat-tile"><div class="label">Grade band</div><div class="value">{{ result.predicted_grade }}</div></div>
+    <div class="col-md-3 stat-tile"><div class="label">Pass probability</div><div class="value">{{ '%.0f'|format(result.pass_probability * 100) }}%</div></div>
+    <div class="col-md-4"><span class="badge badge-risk risk-{{ result.risk_level }} fs-6"><i class="bi bi-{{ {'High':'exclamation-octagon','Medium':'exclamation-triangle','Low':'check-circle'}[result.risk_level] }}"></i> {{ result.risk_level }} risk</span>
+      <div class="small text-secondary mt-1">{{ 'Full model (with G1, G2)' if result.feature_set == 'full' else 'Early-warning model' }}<br>{{ result.model_info }}</div></div>
+  </div>
+  <hr><b class="small">Recommendations</b><ul class="small mb-0">{% for t in result.recommendations %}<li>{{ t }}</li>{% endfor %}</ul>
+</div></div>
+{% endif %}
+<form method="post">
+<div class="card mb-3"><div class="card-header">Course &amp; marks</div><div class="card-body"><div class="row g-3">
+  <div class="col-md-4 col-sm-6"><label class="form-label small mb-1">Subject</label><select class="form-select form-select-sm" name="subject">
+    <option value="MAT" {% if values.subject == 'MAT' %}selected{% endif %}>Mathematics</option><option value="POR" {% if values.subject == 'POR' %}selected{% endif %}>Portuguese</option></select></div>
+  {% for f in mark_fields %}{{ field(f, values) }}{% endfor %}
+</div></div></div>
+<div class="card mb-3"><div class="card-header">Student background</div><div class="card-body"><div class="row g-3">
+  {% for f in student_fields %}{{ field(f, values) }}{% endfor %}
+</div></div></div>
+<div class="card mb-3"><div class="card-header">Study habits &amp; lifestyle</div><div class="card-body"><div class="row g-3">
+  {% for f in record_fields %}{{ field(f, values) }}{% endfor %}
+</div></div></div>
+<button class="btn btn-primary"><i class="bi bi-magic"></i> Predict</button>
+</form>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import pager %}
+{% block title %}Users{% endblock %}
+{% block heading %}User management{% endblock %}
+{% block actions %}<a class="btn btn-sm btn-primary" href="{{ url_for('admin.user_form') }}"><i class="bi bi-plus-lg"></i> New staff user</a>{% endblock %}
+{% block content %}
+<ul class="nav nav-tabs mb-3">
+  <li class="nav-item"><a class="nav-link {% if role == 'staff' %}active{% endif %}" href="{{ url_for('admin.users', role='staff') }}">Admins &amp; teachers</a></li>
+  <li class="nav-item"><a class="nav-link {% if role == 'student' %}active{% endif %}" href="{{ url_for('admin.users', role='student') }}">Student accounts</a></li>
+</ul>
+<div class="card"><div class="table-responsive">
+<table class="table table-hover mb-0">
+  <thead><tr><th>Username</th><th>Name</th><th>Role</th><th>Subject</th><th>Status</th><th class="text-end">Actions</th></tr></thead>
+  <tbody>
+  {% for u in page.items %}
+    <tr>
+      <td><code>{{ u.username }}</code></td><td>{{ u.full_name }}</td><td>{{ u.role|title }}</td>
+      <td>{{ u.subject.name if u.subject else '—' }}</td>
+      <td>{% if u.is_active_user %}<span class="badge text-bg-success">Active</span>{% else %}<span class="badge text-bg-secondary">Disabled</span>{% endif %}</td>
+      <td class="text-end text-nowrap">
+        <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('admin.user_form', uid=u.id) }}">Edit</a>
+        <form class="d-inline" method="post" action="{{ url_for('admin.toggle_user', uid=u.id) }}"><button class="btn btn-sm btn-outline-warning">{{ 'Disable' if u.is_active_user else 'Enable' }}</button></form>
+        {% if u.role != 'student' %}
+        <form class="d-inline" method="post" action="{{ url_for('admin.delete_user', uid=u.id) }}" onsubmit="return confirm('Delete this user?')"><button class="btn btn-sm btn-outline-danger">Delete</button></form>
+        {% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table></div>
+<div class="card-body">{{ pager(page, 'admin.users', {'role': role}) }}</div></div>
+{% endblock %}

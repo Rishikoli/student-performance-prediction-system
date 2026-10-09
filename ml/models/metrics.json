@@ -1,0 +1,473 @@
+{
+  "trained_at": "2026-10-09T10:19:08",
+  "source": "csv",
+  "n_samples": 1044,
+  "n_train": 835,
+  "n_test": 209,
+  "results": {
+    "full_pass": {
+      "DecisionTree": {
+        "accuracy": 0.8947368421052632,
+        "precision": 0.9548387096774194,
+        "recall": 0.9079754601226994,
+        "f1": 0.9308176100628931,
+        "roc_auc": 0.9199786609762604,
+        "confusion_matrix": [
+          [
+            39,
+            7
+          ],
+          [
+            15,
+            148
+          ]
+        ],
+        "labels": [
+          "Fail",
+          "Pass"
+        ],
+        "cv_score": 0.9289558932000377,
+        "cv_metric": "f1",
+        "params": {
+          "max_depth": 5,
+          "min_samples_leaf": 10
+        }
+      },
+      "RandomForest": {
+        "accuracy": 0.9186602870813397,
+        "precision": 0.9620253164556962,
+        "recall": 0.9325153374233128,
+        "f1": 0.9470404984423676,
+        "roc_auc": 0.969591891170979,
+        "confusion_matrix": [
+          [
+            40,
+            6
+          ],
+          [
+            11,
+            152
+          ]
+        ],
+        "labels": [
+          "Fail",
+          "Pass"
+        ],
+        "cv_score": 0.9498741847840666,
+        "cv_metric": "f1",
+        "params": {
+          "max_depth": 10,
+          "min_samples_leaf": 1,
+          "n_estimators": 400
+        }
+      }
+    },
+    "full_grade": {
+      "DecisionTree": {
+        "accuracy": 0.7272727272727273,
+        "f1_macro": 0.7241851711506884,
+        "confusion_matrix": [
+          [
+            14,
+            10,
+            0,
+            0,
+            0
+          ],
+          [
+            1,
+            26,
+            8,
+            0,
+            0
+          ],
+          [
+            0,
+            4,
+            30,
+            9,
+            0
+          ],
+          [
+            0,
+            0,
+            3,
+            41,
+            17
+          ],
+          [
+            0,
+            0,
+            0,
+            5,
+            41
+          ]
+        ],
+        "labels": [
+          "A",
+          "B",
+          "C",
+          "D",
+          "F"
+        ],
+        "cv_score": 0.7590858598578719,
+        "cv_metric": "f1_macro",
+        "params": {
+          "max_depth": 3,
+          "min_samples_leaf": 1
+        }
+      },
+      "RandomForest": {
+        "accuracy": 0.722488038277512,
+        "f1_macro": 0.7116829334571271,
+        "confusion_matrix": [
+          [
+            17,
+            7,
+            0,
+            0,
+            0
+          ],
+          [
+            7,
+            23,
+            5,
+            0,
+            0
+          ],
+          [
+            0,
+            9,
+            25,
+            9,
+            0
+          ],
+          [
+            0,
+            0,
+            4,
+            48,
+            9
+          ],
+          [
+            0,
+            0,
+            0,
+            8,
+            38
+          ]
+        ],
+        "labels": [
+          "A",
+          "B",
+          "C",
+          "D",
+          "F"
+        ],
+        "cv_score": 0.754602657970403,
+        "cv_metric": "f1_macro",
+        "params": {
+          "max_depth": 10,
+          "min_samples_leaf": 1,
+          "n_estimators": 400
+        }
+      }
+    },
+    "full_g3": {
+      "DecisionTree": {
+        "rmse": 1.1626524807433098,
+        "mae": 0.7984731997861221,
+        "r2": 0.9164878505671052,
+        "cv_score": -1.5349773507444853,
+        "cv_metric": "neg_root_mean_squared_error",
+        "params": {
+          "max_depth": 5,
+          "min_samples_leaf": 10
+        }
+      },
+      "RandomForest": {
+        "rmse": 1.1473495121778203,
+        "mae": 0.8301560025567203,
+        "r2": 0.9186717762580245,
+        "cv_score": -1.4663050022316448,
+        "cv_metric": "neg_root_mean_squared_error",
+        "params": {
+          "max_depth": null,
+          "min_samples_leaf": 3,
+          "n_estimators": 400
+        }
+      }
+    },
+    "early_pass": {
+      "DecisionTree": {
+        "accuracy": 0.7177033492822966,
+        "precision": 0.8209876543209876,
+        "recall": 0.8159509202453987,
+        "f1": 0.8184615384615385,
+        "roc_auc": 0.5927580688183516,
+        "confusion_matrix": [
+          [
+            17,
+            29
+          ],
+          [
+            30,
+            133
+          ]
+        ],
+        "labels": [
+          "Fail",
+          "Pass"
+        ],
+        "cv_score": 0.8313037243093115,
+        "cv_metric": "f1",
+        "params": {
+          "max_depth": null,
+          "min_samples_leaf": 1
+        }
+      },
+      "RandomForest": {
+        "accuracy": 0.7894736842105263,
+        "precision": 0.8838709677419355,
+        "recall": 0.8404907975460123,
+        "f1": 0.8616352201257862,
+        "roc_auc": 0.7748732995465458,
+        "confusion_matrix": [
+          [
+            28,
+            18
+          ],
+          [
+            26,
+            137
+          ]
+        ],
+        "labels": [
+          "Fail",
+          "Pass"
+        ],
+        "cv_score": 0.8636744025096179,
+        "cv_metric": "f1",
+        "params": {
+          "max_depth": 10,
+          "min_samples_leaf": 1,
+          "n_estimators": 400
+        }
+      }
+    },
+    "early_grade": {
+      "DecisionTree": {
+        "accuracy": 0.2679425837320574,
+        "f1_macro": 0.24478206080205278,
+        "confusion_matrix": [
+          [
+            3,
+            7,
+            1,
+            8,
+            5
+          ],
+          [
+            11,
+            10,
+            3,
+            9,
+            2
+          ],
+          [
+            10,
+            6,
+            5,
+            16,
+            6
+          ],
+          [
+            5,
+            14,
+            5,
+            17,
+            20
+          ],
+          [
+            3,
+            6,
+            4,
+            12,
+            21
+          ]
+        ],
+        "labels": [
+          "A",
+          "B",
+          "C",
+          "D",
+          "F"
+        ],
+        "cv_score": 0.3207494406729736,
+        "cv_metric": "f1_macro",
+        "params": {
+          "max_depth": 5,
+          "min_samples_leaf": 1
+        }
+      },
+      "RandomForest": {
+        "accuracy": 0.3253588516746411,
+        "f1_macro": 0.3156239189104898,
+        "confusion_matrix": [
+          [
+            8,
+            5,
+            3,
+            6,
+            2
+          ],
+          [
+            12,
+            8,
+            7,
+            5,
+            3
+          ],
+          [
+            7,
+            7,
+            11,
+            10,
+            8
+          ],
+          [
+            2,
+            13,
+            9,
+            18,
+            19
+          ],
+          [
+            1,
+            3,
+            2,
+            17,
+            23
+          ]
+        ],
+        "labels": [
+          "A",
+          "B",
+          "C",
+          "D",
+          "F"
+        ],
+        "cv_score": 0.3703154809398324,
+        "cv_metric": "f1_macro",
+        "params": {
+          "max_depth": 10,
+          "min_samples_leaf": 1,
+          "n_estimators": 400
+        }
+      }
+    },
+    "early_g3": {
+      "DecisionTree": {
+        "rmse": 3.715505911021072,
+        "mae": 2.7743798123662846,
+        "r2": 0.14712432183155688,
+        "cv_score": -3.403918766432814,
+        "cv_metric": "neg_root_mean_squared_error",
+        "params": {
+          "max_depth": 3,
+          "min_samples_leaf": 10
+        }
+      },
+      "RandomForest": {
+        "rmse": 3.3304155271875695,
+        "mae": 2.4173923444976078,
+        "r2": 0.3147537590270961,
+        "cv_score": -3.1663659409045595,
+        "cv_metric": "neg_root_mean_squared_error",
+        "params": {
+          "max_depth": null,
+          "min_samples_leaf": 1,
+          "n_estimators": 200
+        }
+      }
+    }
+  },
+  "best": {
+    "full_pass": "RandomForest",
+    "full_grade": "DecisionTree",
+    "full_g3": "RandomForest",
+    "early_pass": "RandomForest",
+    "early_grade": "RandomForest",
+    "early_g3": "RandomForest"
+  },
+  "feature_importance": {
+    "full": {
+      "G2": 0.3235418418059683,
+      "G1": 0.24074180302227452,
+      "failures": 0.045658044045680635,
+      "subject": 0.040816375264806824,
+      "absences": 0.024943039914944377,
+      "school": 0.019514959490048868,
+      "reason": 0.01907401399248382,
+      "Mjob": 0.01903270955321406,
+      "goout": 0.017703831460124695,
+      "Fjob": 0.016217940277733076,
+      "age": 0.0156746328536852,
+      "freetime": 0.014401485404326335,
+      "Walc": 0.01432261563817257,
+      "famrel": 0.013885673577891736,
+      "Fedu": 0.013802385050349988,
+      "health": 0.01377715920155296,
+      "Medu": 0.012990764347588387,
+      "guardian": 0.012772449040050723,
+      "higher": 0.012404088345031282,
+      "Dalc": 0.011253174254911055,
+      "sex": 0.011036409065331487,
+      "studytime": 0.010963329113093964,
+      "traveltime": 0.010059196661808283,
+      "famsize": 0.009898268362769965,
+      "address": 0.009664275048789037,
+      "romantic": 0.006246303944107948,
+      "schoolsup": 0.006138829598067391,
+      "activities": 0.006075873544248614,
+      "paid": 0.005949900631509455,
+      "famsup": 0.00571029533495794,
+      "internet": 0.005675979053880194,
+      "nursery": 0.005186486253667467,
+      "Pstatus": 0.004865866846928836
+    },
+    "early": {
+      "failures": 0.08804389119684987,
+      "subject": 0.08342841581920285,
+      "absences": 0.06267785257723124,
+      "Mjob": 0.048386236824917134,
+      "reason": 0.04495083046398985,
+      "school": 0.04393777038788696,
+      "goout": 0.04042577793366045,
+      "Fjob": 0.037981951987365606,
+      "age": 0.03561210259458415,
+      "freetime": 0.03505526482984714,
+      "Walc": 0.03384849640616873,
+      "Fedu": 0.033190131397172716,
+      "famrel": 0.03224921777515732,
+      "health": 0.032120202851333816,
+      "Medu": 0.03147012551147746,
+      "guardian": 0.030835668933697213,
+      "studytime": 0.028481373832228575,
+      "sex": 0.028140087867236492,
+      "higher": 0.027887070198571555,
+      "address": 0.02378183705744427,
+      "Dalc": 0.02298463574755071,
+      "traveltime": 0.0225334504492989,
+      "famsize": 0.022215690559574466,
+      "famsup": 0.015284103085741532,
+      "paid": 0.015217444530745824,
+      "activities": 0.014185410045060359,
+      "romantic": 0.01412501688812917,
+      "schoolsup": 0.013892147635921682,
+      "nursery": 0.013200937482484151,
+      "Pstatus": 0.012338943274359315,
+      "internet": 0.011517913855110576
+    }
+  }
+}

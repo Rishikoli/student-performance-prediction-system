@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block title %}Performance report{% endblock %}
+{% block heading %}Performance analysis report{% endblock %}
+{% block actions %}
+  {% if current_user.role == 'admin' %}
+  <select id="subjectFilter" class="form-select form-select-sm" style="width:auto">
+    <option value="">All subjects</option>{% for s in subjects %}<option value="{{ s.code }}">{{ s.name }}</option>{% endfor %}
+  </select>{% endif %}
+  <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('common.export_csv') }}"><i class="bi bi-download"></i> CSV</a>
+  <button class="btn btn-sm btn-outline-secondary" onclick="print()"><i class="bi bi-printer"></i> Print</button>
+{% endblock %}
+{% block content %}
+<p class="text-secondary">Dataset: UCI Student Performance (Cortez &amp; Silva, 2008), secondary school students of two Portuguese schools. Pass = final grade G3 ≥ 10 out of 20.
+  Figures reflect graded records currently in the database.</p>
+<div class="row g-3 mb-3">
+  <div class="col-6 col-lg-3"><div class="card stat-tile"><div class="card-body"><div class="label">Graded records</div><div class="value" id="kN">–</div></div></div></div>
+  <div class="col-6 col-lg-3"><div class="card stat-tile"><div class="card-body"><div class="label">Pass rate</div><div class="value" id="kPass">–</div></div></div></div>
+  <div class="col-6 col-lg-3"><div class="card stat-tile"><div class="card-body"><div class="label">Average final grade</div><div class="value" id="kAvg">–</div></div></div></div>
+  <div class="col-6 col-lg-3"><div class="card stat-tile"><div class="card-body"><div class="label">Average absences</div><div class="value" id="kAbs">–</div></div></div></div>
+</div>
+<div class="row g-3">
+  <div class="col-lg-6"><div class="card"><div class="card-header">Grade distribution</div><div class="card-body"><div class="chart-box"><canvas id="gradeChart"></canvas></div></div></div></div>
+  <div class="col-lg-6"><div class="card"><div class="card-header">Average grade by period</div><div class="card-body"><div class="chart-box"><canvas id="periodChart"></canvas></div></div></div></div>
+  <div class="col-lg-6"><div class="card"><div class="card-header">Period 2 grade vs final grade</div><div class="card-body"><div class="chart-box tall"><canvas id="scatterChart"></canvas></div></div></div></div>
+  <div class="col-lg-6"><div class="card"><div class="card-header">Correlation of numeric attributes with final grade</div><div class="card-body"><div class="chart-box tall"><canvas id="corrChart"></canvas></div></div></div></div>
+  <div class="col-lg-6"><div class="card"><div class="card-header">Pass rate by past class failures</div><div class="card-body"><div class="chart-box"><canvas id="failChart"></canvas></div></div></div></div>
+  <div class="col-lg-6"><div class="card"><div class="card-header">Pass rate by weekly study time</div><div class="card-body"><div class="chart-box"><canvas id="studyChart"></canvas></div></div></div></div>
+  <div class="col-lg-6"><div class="card"><div class="card-header">Average final grade by absences</div><div class="card-body"><div class="chart-box"><canvas id="absChart"></canvas></div></div></div></div>
+  <div class="col-lg-6"><div class="card"><div class="card-header">Average final grade by weekend alcohol use (1 = very low, 5 = very high)</div><div class="card-body"><div class="chart-box"><canvas id="walcChart"></canvas></div></div></div></div>
+  <div class="col-lg-6"><div class="card"><div class="card-header">Pass rate by intention to pursue higher education</div><div class="card-body"><div class="chart-box"><canvas id="higherChart"></canvas></div></div></div></div>
+  <div class="col-lg-6"><div class="card"><div class="card-header">Predicted risk levels</div><div class="card-body"><div class="chart-box"><canvas id="riskChart"></canvas></div></div></div></div>
+</div>
+<div class="card mt-3"><div class="card-header">Group comparison table</div><div class="table-responsive"><table class="table table-sm mb-0 num" id="groupTable"></table></div></div>
+{% endblock %}
+{% block scripts %}
+<script>
+let charts = [];
+function groupRows(s) {
+  const groups = [['Study time', s.studytime], ['Past failures', s.failures], ['Absences', s.absences], ['Higher education', s.higher],
+                  ['Weekend alcohol', s.walc], ['School', s.school], ['Sex', s.sex]];
+  let h = '<thead><tr><th>Factor</th><th>Group</th><th class="text-end">Students</th><th class="text-end">Avg G3</th><th class="text-end">Pass rate</th></tr></thead><tbody>';
+  for (const [name, g] of groups) g.labels.forEach((l, i) => {
+    h += `<tr><td>${i ? '' : name}</td><td>${l}</td><td class="text-end">${g.n[i]}</td><td class="text-end">${g.avg_g3[i] ?? '—'}</td><td class="text-end">${g.pass_rate[i] ?? '—'}%</td></tr>`;
+  });
+  groupTable.innerHTML = h + '</tbody>';
+}
+async function refresh() {
+  charts.forEach(c => c && c.destroy());
+  const f = document.getElementById('subjectFilter');
+  const s = await loadStats(f ? f.value : '');
+  if (s.empty) return;
+  kN.textContent = s.n; kPass.textContent = s.pass_rate + '%'; kAvg.textContent = s.avg_g3; kAbs.textContent = s.avg_absences;
+  charts = renderStatsCharts(s); groupRows(s);
+}
+const sf = document.getElementById('subjectFilter'); if (sf) sf.addEventListener('change', refresh);
+refresh();
+</script>
+{% endblock %}

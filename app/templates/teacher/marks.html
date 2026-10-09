@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import pager %}
+{% block title %}Marks entry{% endblock %}
+{% block heading %}Marks entry · {{ current_user.subject.name }}{% endblock %}
+{% block content %}
+<form class="d-flex gap-2 mb-3 no-print" method="get" style="max-width:420px">
+  <input class="form-control form-control-sm" name="q" value="{{ q }}" placeholder="Search roll no or name"><button class="btn btn-sm btn-outline-secondary">Search</button>
+</form>
+<form method="post">
+<div class="card"><div class="table-responsive"><table class="table table-sm mb-0 num">
+  <thead><tr><th>Roll no</th><th>Name</th><th>G1 (0-20)</th><th>G2 (0-20)</th><th>G3 (0-20)</th><th>Assignment (0-100)</th><th>Practical (0-100)</th></tr></thead>
+  <tbody>{% for r in page.items %}<tr>
+    <td><input type="hidden" name="rid_{{ r.id }}" value="1"><a href="{{ url_for('common.student_detail', sid=r.student_id) }}">{{ r.student.roll_no }}</a></td><td>{{ r.student.name }}</td>
+    {% for key, val, mx in [('G1', r.G1, 20), ('G2', r.G2, 20), ('G3', r.G3, 20), ('as', r.assignment_score, 100), ('ps', r.practical_score, 100)] %}
+    <td><input type="number" class="form-control form-control-sm marks-input" name="{{ key }}_{{ r.id }}" min="0" max="{{ mx }}" step="{{ '0.5' if mx == 100 else '1' }}" value="{{ val if val is not none else '' }}"></td>
+    {% endfor %}</tr>{% endfor %}</tbody>
+</table></div>
+<div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2">
+  <button class="btn btn-primary"><i class="bi bi-save"></i> Save this page</button>{{ pager(page, 'teacher.marks', {'q': q}) }}</div></div>
+</form>
+{% endblock %}

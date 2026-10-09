@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}Admin dashboard{% endblock %}
+{% block heading %}Admin dashboard{% endblock %}
+{% block actions %}
+  <select id="subjectFilter" class="form-select form-select-sm" style="width:auto">
+    <option value="">All subjects</option>
+    {% for s in subjects %}<option value="{{ s.code }}">{{ s.name }}</option>{% endfor %}
+  </select>
+  <form method="post" action="{{ url_for('admin.predict_all') }}"><button class="btn btn-sm btn-primary"><i class="bi bi-magic"></i> Predict all</button></form>
+{% endblock %}
+{% block content %}
+<div class="row g-3 mb-3">
+  {% for label, val, sub in [('Students', stats.students, 'unique learners'), ('Academic records', stats.records, 'student × subject'),
+                              ('Teachers', stats.teachers, 'active accounts'), ('Predictions', stats.predictions, 'generated so far')] %}
+  <div class="col-6 col-lg-3"><div class="card stat-tile"><div class="card-body">
+    <div class="label">{{ label }}</div><div class="value num">{{ '{:,}'.format(val) }}</div><div class="sub">{{ sub }}</div></div></div></div>
+  {% endfor %}
+</div>
+<div class="row g-3 mb-3">
+  <div class="col-6 col-lg-3"><div class="card stat-tile"><div class="card-body"><div class="label">Pass rate (G3 ≥ 10)</div><div class="value" id="kPass">–</div></div></div></div>
+  <div class="col-6 col-lg-3"><div class="card stat-tile"><div class="card-body"><div class="label">Average final grade</div><div class="value" id="kAvg">–</div><div class="sub">out of 20</div></div></div></div>
+  <div class="col-6 col-lg-3"><div class="card stat-tile"><div class="card-body"><div class="label">Average absences</div><div class="value" id="kAbs">–</div></div></div></div>
+  <div class="col-6 col-lg-3"><div class="card stat-tile"><div class="card-body"><div class="label">Best model accuracy</div>
+    <div class="value">{% if metrics %}{{ '%.1f'|format(metrics.results.full_pass[metrics.best.full_pass].accuracy * 100) }}%{% else %}–{% endif %}</div>
+    <div class="sub">{% if metrics %}{{ metrics.best.full_pass }}, pass/fail, test set{% else %}not trained{% endif %}</div></div></div></div>
+</div>
+<div class="row g-3">
+  <div class="col-lg-6"><div class="card"><div class="card-header">Grade distribution</div><div class="card-body"><div class="chart-box"><canvas id="gradeChart"></canvas></div></div></div></div>
+  <div class="col-lg-6"><div class="card"><div class="card-header">Average grade by period</div><div class="card-body"><div class="chart-box"><canvas id="periodChart"></canvas></div></div></div></div>
+  <div class="col-lg-6"><div class="card"><div class="card-header">Predicted risk levels</div><div class="card-body"><div class="chart-box"><canvas id="riskChart"></canvas></div></div></div></div>
+  <div class="col-lg-6"><div class="card"><div class="card-header">Pass rate by weekly study time</div><div class="card-body"><div class="chart-box"><canvas id="studyChart"></canvas></div></div></div></div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+let charts = [];
+async function refresh() {
+  charts.forEach(c => c && c.destroy());
+  const s = await loadStats(document.getElementById('subjectFilter').value);
+  if (s.empty) return;
+  kPass.textContent = s.pass_rate + '%'; kAvg.textContent = s.avg_g3; kAbs.textContent = s.avg_absences;
+  charts = renderStatsCharts(s);
+}
+subjectFilter.addEventListener('change', refresh);
+refresh();
+</script>
+{% endblock %}
